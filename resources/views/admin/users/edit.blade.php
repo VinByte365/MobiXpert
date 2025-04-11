@@ -1,0 +1,60 @@
+@extends('admin.layouts.app')
+
+@section('title', 'Edit User')
+
+@section('content')
+<div class="card">
+    <div class="card-header">
+        <h1>Edit User: {{ $user->name }}</h1>
+    </div>
+    <div class="card-body">
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        
+        <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
+            @csrf
+            @method('PUT')
+            
+            <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" name="name" 
+                       value="{{ old('name', $user->name) }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" 
+                       value="{{ old('email', $user->email) }}" required>
+            </div>
+            
+            <div class="mb-3">
+                <label for="role" class="form-label">Role</label>
+                <select class="form-select" id="role" name="role" required>
+                    <option value="user" {{ old('role', $user->role) == 'user' ? 'selected' : '' }}>User</option>
+                    <option value="admin" {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin</option>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status" required>
+                    <option value="active" {{ old('status', $user->status) == 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="deactivated" {{ old('status', $user->status) == 'deactivated' ? 'selected' : '' }}>Deactivated</option>
+                </select>
+            </div>
+            
+            <div class="modal-footer">
+                <a href="{{ route('admin.users') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Update User</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endsection

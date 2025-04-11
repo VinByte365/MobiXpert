@@ -17,8 +17,6 @@ return new class extends Migration
             $table->decimal('min_price', 10);
             $table->decimal('max_price', 10);
             $table->timestamps();
-            $table->unsignedBigInteger('product_id')->index('price_ranges_product_id_foreign');
-            $table->unsignedBigInteger('brand_id')->index('price_ranges_brand_id_foreign');
         });
     }
 

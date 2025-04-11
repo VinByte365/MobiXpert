@@ -21,6 +21,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'role',
+        'status', // Make sure this is included
     ];
 
     /**
@@ -41,4 +43,12 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * Get the orders for the user.
+     */
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'id', 'id');
+    }
 }
