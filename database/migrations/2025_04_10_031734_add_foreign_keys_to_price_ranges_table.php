@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('price_ranges', function (Blueprint $table) {
-            $table->foreign(['brand_id'])->references(['brand_id'])->on('brands')->onUpdate('restrict')->onDelete('cascade');
             $table->foreign(['product_id'])->references(['product_id'])->on('products')->onUpdate('restrict')->onDelete('cascade');
         });
     }

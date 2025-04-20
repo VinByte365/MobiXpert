@@ -10,9 +10,6 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
 
 Auth::routes(['verify' => true]);
 
