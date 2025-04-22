@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderLine;
 use App\Models\Product;
+use App\Models\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Mail\OrderConfirmationMail;
 use Illuminate\Support\Facades\Mail;
-use App\Http\Controllers\Cart;
 use PDF;
 
 class OrderController extends Controller
@@ -65,7 +65,7 @@ class OrderController extends Controller
         $request->session()->forget('cart');
         
         if (Auth::check()) {
-            Cart::where('user_id', Auth::id())->delete();
+            Cart::where('id', Auth::id())->delete();
         }
         
         return redirect()->route('orders.show', $order->order_id)

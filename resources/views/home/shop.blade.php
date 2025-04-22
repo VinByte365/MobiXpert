@@ -38,7 +38,7 @@
                                     <option value="">All Prices</option>
                                     @foreach($priceRanges as $range)
                                         <option value="{{ $range->price_range_id }}" {{ request('price_range') == $range->price_range_id ? 'selected' : '' }}>
-                                            {{ $range->name }}
+                                            {{ $range->range_name }}
                                         </option>
                                     @endforeach
                                 </select>

@@ -23,7 +23,7 @@
                     <tr>
                         <td>{{ $order->order_id }}</td>
                         <td>{{ $order->created_at->format('M d, Y') }}</td>
-                        <td>${{ number_format($order->total_amount, 2) }}</td>
+                        <td> ₱{{ number_format($order->total_amount, 2) }}</td>
                         <td>{{ ucfirst($order->status) }}</td>
                         <td>
                             <a href="{{ route('orders.show', $order->order_id) }}" class="btn btn-sm btn-primary">

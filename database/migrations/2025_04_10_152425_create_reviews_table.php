@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id('review_id');
             $table->unsignedBigInteger('product_id');
             $table->unsignedBigInteger('id');
+            $table->unsignedBigInteger('order_id');
             $table->integer('rating')->comment('Rating from 1-5');
             $table->text('comment')->nullable();
             $table->timestamps();
@@ -22,6 +23,7 @@ return new class extends Migration
             // Foreign key constraints
             $table->foreign('product_id')->references('product_id')->on('products')->onDelete('cascade');
             $table->foreign('id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('order_id')->references('order_id')->on('orders')->onDelete('cascade');
         });
     }
 

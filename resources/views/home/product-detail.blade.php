@@ -27,7 +27,7 @@
             <p class="text-muted mb-3">Brand: {{ $product->brand->name }}</p>
             @endif
             
-            <h2 class="text-primary mb-3">${{ number_format($product->price, 2) }}</h2>
+            <h2 class="text-primary mb-3">₱{{ number_format($product->price, 2) }}</h2>
             
             <div class="mb-4">
                 <p>{{ $product->description }}</p>
@@ -127,7 +127,7 @@
                                         <strong>{{ $review->user->name }}</strong>
                                         <div class="text-muted small">{{ $review->created_at->format('M d, Y') }}</div>
                                     </div>
-                                    <div>
+                                    <div class="d-flex align-items-center">
                                         @for($i = 1; $i <= 5; $i++)
                                             @if($i <= $review->rating)
                                                 <i class="fas fa-star text-warning"></i>
@@ -135,6 +135,25 @@
                                                 <i class="far fa-star text-warning"></i>
                                             @endif
                                         @endfor
+                                        @if(auth()->check() && $review->id === auth()->id())
+                                            <div class="dropdown ms-2">
+                                                <button class="btn btn-link text-dark p-0" type="button" id="reviewMenu{{ $review->review_id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="reviewMenu{{ $review->review_id }}">
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ route('reviews.edit', $review->review_id) }}">Edit</a>
+                                                    </li>
+                                                    <li>
+                                                        <form action="{{ route('reviews.destroy', $review->review_id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this review?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="dropdown-item text-danger">Delete</button>
+                                                        </form>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
                                 <p class="mb-0">{{ $review->comment }}</p>

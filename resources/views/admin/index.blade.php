@@ -92,7 +92,7 @@
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-0">
-                    <a href="{{ route('admin.reviews') }}" class="text-white small stretched-link">View Details</a>
+                    <a href="{{ route('admin.reviews.index') }}" class="text-white small stretched-link">View Details</a>
                 </div>
             </div>
         </div>
@@ -114,7 +114,7 @@
                     </div>
                 </div>
                 <div class="card-footer bg-transparent border-0">
-                    <a href="{{ route('admin.reviews') }}" class="text-white small stretched-link">View Details</a>
+                    <a href="{{ route('admin.reviews.index') }}" class="text-white small stretched-link">View Details</a>
                 </div>
             </div>
         </div>
@@ -206,7 +206,7 @@
                     </div>
                 </div>
                 <div class="card-footer text-center">
-                    <a href="{{ route('admin.reviews') }}" class="btn btn-sm btn-primary">View All Reviews</a>
+                    <a href="{{ route('admin.reviews.index') }}" class="btn btn-sm btn-primary">View All Reviews</a>
                 </div>
             </div>
         </div>

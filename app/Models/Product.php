@@ -38,4 +38,12 @@ class Product extends Model
     {
         return $this->hasMany(Review::class, 'product_id', 'product_id');
     }
+    
+    /**
+     * Get the order lines for the product.
+     */
+    public function orderLines()
+    {
+        return $this->hasMany(OrderLine::class, 'product_id', 'product_id');
+    }
 }

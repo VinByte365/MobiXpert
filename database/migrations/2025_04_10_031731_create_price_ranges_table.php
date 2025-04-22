@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('price_ranges', function (Blueprint $table) {
             $table->bigIncrements('price_range_id');
-            $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('product_id')->nullable();
             $table->string('range_name');
             $table->decimal('min_price', 10);
             $table->decimal('max_price', 10);

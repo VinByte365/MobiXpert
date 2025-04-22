@@ -21,20 +21,19 @@ class ProductDataTable extends DataTable
                 return '<img src="'.$imageUrl.'" alt="'.$product->name.'" class="img-thumbnail" width="50">';
             })
             ->addColumn('action', function($product) {
-                return '<div class="btn-group">
-                    <a href="'.route('admin.products.edit', $product->product_id).'" 
-                       class="btn btn-sm btn-primary edit-product" 
-                       data-id="'.$product->product_id.'">
-                       <i class="fas fa-edit"></i> Edit
+                // Use standard HTML form for delete (no JS required)
+                return '
+                    <a href="'.route('admin.products.edit', $product->product_id).'" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i> Edit
                     </a>
-                    <button type="button" 
-                            class="btn btn-sm btn-danger delete-product" 
-                            data-id="'.$product->product_id.'" 
-                            data-name="'.$product->name.'"
-                            data-url="'.route('admin.products.destroy', $product->product_id).'">
+                    <form action="'.route('admin.products.destroy', $product->product_id).'" method="POST" style="display:inline;">
+                        '.csrf_field().'
+                        '.method_field('DELETE').'
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm(\'Are you sure you want to delete this product?\')">
                             <i class="fas fa-trash"></i> Delete
-                    </button>
-                </div>';
+                        </button>
+                    </form>
+                ';
             })
             ->rawColumns(['image', 'action'])
             ->setRowId('product_id');

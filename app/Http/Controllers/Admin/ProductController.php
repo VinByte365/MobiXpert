@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Brand;
 use App\Models\PriceRange;
+use App\Imports\ProductsImport;
 
 class ProductController extends Controller
 {
@@ -14,7 +15,7 @@ class ProductController extends Controller
     {
         try {
             // Get products with relationships
-            $products = Product::with(['brand', 'priceRange'])->get();
+            $products = Product::with(['brand'])->get();
             
             // Debug information
             if ($products->isEmpty()) {
@@ -38,8 +39,7 @@ class ProductController extends Controller
     public function create()
     {
         $brands = Brand::all();
-        $priceRanges = PriceRange::all();
-        return view('admin.products.create', compact('brands', 'priceRanges'));
+        return view('admin.products.create', compact('brands'));
     }
 
     public function store(Request $request)
@@ -50,7 +50,6 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'brand_id' => 'required|exists:brands,brand_id',
-            'price_range_id' => 'required|exists:price_ranges,price_range_id',
             'image' => 'nullable|image|max:2048',
         ]);
 
@@ -60,7 +59,6 @@ class ProductController extends Controller
         $product->price = $request->price;
         $product->stock_quantity = $request->stock_quantity;
         $product->brand_id = $request->brand_id;
-        $product->price_range_id = $request->price_range_id;
 
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('products', 'public');
@@ -81,8 +79,7 @@ class ProductController extends Controller
     {
         $product = Product::findOrFail($id);
         $brands = Brand::all();
-        $priceRanges = PriceRange::all();
-        return view('admin.products.edit', compact('product', 'brands', 'priceRanges'));
+        return view('admin.products.edit', compact('product', 'brands'));
     }
 
     public function update(Request $request, $id)
@@ -93,7 +90,6 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'brand_id' => 'required|exists:brands,brand_id',
-            'price_range_id' => 'required|exists:price_ranges,price_range_id',
             'image' => 'nullable|image|max:2048',
         ]);
 
@@ -103,7 +99,6 @@ class ProductController extends Controller
         $product->price = $request->price;
         $product->stock_quantity = $request->stock_quantity;
         $product->brand_id = $request->brand_id;
-        $product->price_range_id = $request->price_range_id;
 
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('products', 'public');
@@ -140,7 +135,7 @@ class ProductController extends Controller
         ]);
 
         try {
-            \Maatwebsite\Excel\Facades\Excel::import(new \App\Imports\ProductsImport, $request->file('file'));
+            \Maatwebsite\Excel\Facades\Excel::import(new ProductsImport(), $request->file('file'));
             
             session()->flash('notification', [
                 'type' => 'success',
@@ -174,7 +169,7 @@ class ProductController extends Controller
                 '999.99', 
                 '100', 
                 '1', // Replace with a valid brand_id
-                '1', // Replace with a valid price_range_id
+                '1',
                 'products/sample.jpg' // Optional
             ]);
             

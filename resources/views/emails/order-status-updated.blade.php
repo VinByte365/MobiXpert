@@ -1,7 +1,7 @@
 @component('mail::message')
 # Order Status Update
 
-Your order #{{ $order->id }} status has been updated to: **{{ ucfirst($order->status) }}**
+Your order #{{ $order->order_id }} status has been updated to: **{{ ucfirst($order->status) }}**
 
 @if($order->status === 'completed')
 Thank you for your order! It has been completed successfully.

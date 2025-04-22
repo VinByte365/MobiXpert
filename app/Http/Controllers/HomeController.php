@@ -6,7 +6,7 @@ use App\Models\Product;
 use App\Models\Brand;
 use App\Models\PriceRange;
 use Illuminate\Http\Request;
-use App\Facades\Cart; // Changed from App\Models\Cart to App\Facades\Cart
+use App\Facades\Cart;
 
 class HomeController extends Controller
 {
@@ -34,7 +34,11 @@ class HomeController extends Controller
         
         // Filter by price range
         if ($request->has('price_range') && $request->price_range != '') {
-            $query->where('price_range_id', $request->price_range);
+            $priceRange = PriceRange::find($request->price_range);
+            if ($priceRange) {
+                $query->where('price', '>=', $priceRange->min_price)
+                      ->where('price', '<=', $priceRange->max_price);
+            }
         }
         
         // Search by name

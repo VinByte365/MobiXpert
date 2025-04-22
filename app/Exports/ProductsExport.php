@@ -2,50 +2,34 @@
 
 namespace App\Exports;
 
-use App\Models\Brand;
-use App\Models\PriceRange;
-use Maatwebsite\Excel\Concerns\FromArray;
+use App\Models\Product;
+use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
-use Maatwebsite\Excel\Concerns\WithStrictNullComparison;
 
-class ProductsExport implements FromArray, WithHeadings, WithStrictNullComparison
+class ProductsExport implements FromCollection, WithHeadings, WithMapping
 {
-    public function array(): array
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    public function collection()
     {
-        // Get first brand and price range for sample
-        $brand = Brand::first();
-        $priceRange = PriceRange::first();
-        
-        if (!$brand || !$priceRange) {
-            // Add note about creating brands and price ranges first
-            return [
-                [
-                    'Sample Product', 
-                    'This is a sample product description', 
-                    '99.99', 
-                    '10', 
-                    'Create brands first', 
-                    'Create price ranges first',
-                    'products/default.png'
-                ],
-            ];
-        }
-        
-        // Sample data with actual IDs
-        return [
+        // For template, return empty or sample data
+        return collect([
             [
-                'Sample Product', 
-                'This is a sample product description', 
-                '99.99', 
-                '10', 
-                $brand->brand_id, 
-                $priceRange->price_range_id,
-                'products/default.png'
-            ],
-        ];
+                'name' => 'Sample Product',
+                'description' => 'This is a sample product description',
+                'price' => 499.99,
+                'stock_quantity' => 100,
+                'brand' => 'Sample Brand',
+                'image_path' => 'products/sample.jpg'
+            ]
+        ]);
     }
-
+    
+    /**
+     * @return array
+     */
     public function headings(): array
     {
         return [
@@ -53,9 +37,26 @@ class ProductsExport implements FromArray, WithHeadings, WithStrictNullCompariso
             'description',
             'price',
             'stock_quantity',
-            'brand_id',
+            'brand',
             'price_range_id',
-            'image_path',
+            'image_path'
+        ];
+    }
+    
+    /**
+     * @param mixed $row
+     * @return array
+     */
+    public function map($row): array
+    {
+        return [
+            'name' => $row['name'],
+            'description' => $row['description'],
+            'price' => $row['price'],
+            'stock_quantity' => $row['stock_quantity'],
+            'brand' => $row['brand'],
+            'price_range_id' => $row['price_range_id'],
+            'image_path' => $row['image_path']
         ];
     }
 }

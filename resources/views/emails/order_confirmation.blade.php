@@ -26,7 +26,7 @@
             <div class="order-details">
                 <h3 style="margin-top:0; color:#4a90e2;">Order Summary</h3>
                 <p><strong>Order Date:</strong> {{ $order->created_at->format('F j, Y \a\t g:i A') }}</p>
-                <p><strong>Order Total:</strong> ${{ number_format($order->total_amount, 2) }}</p>
+                <p><strong>Order Total:</strong>  ₱{{ number_format($order->total_amount, 2) }}</p>
                 <p><strong>Status:</strong> <span style="color:#4a90e2; font-weight:bold;">{{ ucfirst($order->status) }}</span></p>
             </div>
 

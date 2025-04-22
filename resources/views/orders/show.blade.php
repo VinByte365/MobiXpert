@@ -42,6 +42,9 @@
                                     <th>Price</th>
                                     <th>Quantity</th>
                                     <th>Subtotal</th>
+                                    @if($order->status == 'completed')
+                                    <th>Action</th>
+                                    @endif
                                 </tr>
                             </thead>
                             <tbody>
@@ -54,7 +57,14 @@
                                         </td>
                                         <td>${{ number_format($line->price, 2) }}</td>
                                         <td>{{ $line->quantity }}</td>
-                                        <td>${{ number_format($line->price * $line->quantity, 2) }}</td>
+                                        <td> ₱{{ number_format($line->price * $line->quantity, 2) }}</td>
+                                        @if($order->status == 'completed')
+                                        <td>
+                                        <a href="{{ route('reviews.create', ['orderId' => $order->order_id, 'productId' => $line->product_id]) }}" class="btn btn-sm btn-primary">
+                                                Leave a Review
+                                        </a>
+                                        </td>
+                                        @endif
                                     </tr>
                                 @endforeach
                             </tbody>

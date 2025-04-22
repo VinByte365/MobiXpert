@@ -1,72 +1,93 @@
 @extends('admin.layouts.app')
 
-@section('title', 'Users')
+@section('title', 'Users Management')
 
 @section('styles')
-<link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-<link href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" rel="stylesheet">
+<style>
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .user-table th, .user-table td {
+        vertical-align: middle;
+    }
+    .search-box {
+        margin-bottom: 20px;
+    }
+</style>
 @endsection
 
 @section('content')
-<div class="card">
-    @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
-        {{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    @endif
-    <!-- Add this button next to your "Add New User" button -->
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h1>Users</h1>
+<div class="card shadow mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <h6 class="m-0 font-weight-bold text-primary">Users</h6>
         <div>
-            <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#importUsersModal">
-                <i class="fas fa-file-import"></i> Import Users
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                <i class="fas fa-plus"></i> Add User
             </button>
-            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                <i class="fas fa-plus"></i> Add New User
-            </button>
-        </div>
-    </div>
-    
-    <!-- Add this modal for importing users -->
-    <div class="modal fade" id="importUsersModal" tabindex="-1" aria-labelledby="importUsersModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="importUsersModalLabel">Import Users</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('admin.users.import') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="file" class="form-label">Excel File</label>
-                            <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls,.csv" required>
-                        </div>
-                        <div class="alert alert-info">
-                            <p class="mb-0">Please ensure your Excel file has the following columns:</p>
-                            <ul class="mb-0">
-                                <li>name (required)</li>
-                                <li>email (required)</li>
-                                <li>password (optional)</li>
-                                <li>role (optional)</li>
-                                <li>status (optional)</li>
-                            </ul>
-                            <a href="{{ route('admin.users.template') }}" class="btn btn-sm btn-outline-primary mt-2">
-                                Download Template
-                            </a>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Import</button>
-                    </div>
-                </form>
-            </div>
         </div>
     </div>
     <div class="card-body">
-        {!! $dataTable->table(['class' => 'table table-bordered table-striped']) !!}
+        @if(isset($users) && count($users) > 0)
+            <div class="search-box">
+                <form action="{{ route('admin.users') }}" method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" name="search" class="form-control" placeholder="Search users..." value="{{ request('search') }}">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-bordered user-table" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($users as $user)
+                        <tr>
+                            <td>{{ $user->id }}</td>
+                            <td>{{ $user->name }}</td>
+                            <td>{{ $user->email }}</td>
+                            <td>{{ ucfirst($user->role) }}</td>
+                            <td>{{ ucfirst($user->status) }}</td>
+                            <td>
+                                <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="d-flex justify-content-center mt-4">
+                {{ $users->links() }}
+            </div>
+        @else
+            <div class="alert alert-info">
+                No users found. Please add some users or import them.
+            </div>
+        @endif
     </div>
 </div>
 
@@ -121,34 +142,3 @@
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-$(document).ready(function() {
-    // Delete button handler
-    $(document).on('click', '.delete-user', function() {
-        var id = $(this).data('id');
-        var name = $(this).data('name');
-        var url = $(this).data('url');
-        
-        if (confirm('Are you sure you want to delete ' + name + '?')) {
-            $.ajax({
-                url: url,
-                type: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    window.LaravelDataTables['users-table'].ajax.reload();
-                    alert(response.message || 'User deleted successfully');
-                },
-                error: function(xhr) {
-                    alert('Error: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Could not delete user'));
-                }
-            });
-        }
-    });
-});
-</script>
-{!! $dataTable->scripts() !!}
-@endpush

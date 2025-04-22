@@ -23,6 +23,9 @@ use App\DataTables\ReviewDataTable;
 
 class AdminController extends Controller
 {
+
+
+    
     public function index()
     {
         return view('admin.index');
@@ -32,10 +35,8 @@ class AdminController extends Controller
     {
         $brands = Brand::all();
         $priceRanges = PriceRange::all();
-        
-        // Change from get() to paginate()
         $products = Product::with('brand')->paginate(10);
-        
+
         return $dataTable->render('admin.products.index', compact('brands', 'priceRanges', 'products'));
     }
 
@@ -71,9 +72,6 @@ class AdminController extends Controller
             ->make(true);
     }
 
-    // Remove the getProducts method as it's redundant with the DataTable implementation
-    // The getProductsData method handles the AJAX requests for the DataTable
-
     public function store(Request $request)
     {
         $request->validate([
@@ -83,7 +81,6 @@ class AdminController extends Controller
             'stock_quantity' => 'required|integer|min:0',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'brand_id' => 'required|exists:brands,brand_id',
-            'price_range_id' => 'required|exists:price_ranges,price_range_id'
         ]);
 
         // Handle image upload
@@ -96,7 +93,6 @@ class AdminController extends Controller
             'stock_quantity' => $request->stock_quantity,
             'image_path' => $imagePath,
             'brand_id' => $request->brand_id,
-            'price_range_id' => $request->price_range_id
         ]);
 
         // Debug: Check if product was created
@@ -115,7 +111,6 @@ class AdminController extends Controller
             'price' => 'required|numeric|min:0',
             'stock_quantity' => 'required|integer|min:0',
             'brand_id' => 'required|exists:brands,brand_id',
-            'price_range_id' => 'required|exists:price_ranges,price_range_id',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
         ]);
 
@@ -147,15 +142,10 @@ class AdminController extends Controller
             
             $product->delete();
             
-            return response()->json([
-                'success' => true,
-                'message' => "Product '{$name}' has been deleted successfully."
-            ]);
+            // Redirect with a flash message instead of JSON debug output
+            return redirect()->route('admin.products')->with('success', "Product '{$name}' has been deleted successfully.");
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => "Error deleting product: " . $e->getMessage()
-            ], 500);
+            return redirect()->route('admin.products')->with('error', "Error deleting product: " . $e->getMessage());
         }
     }
 
@@ -171,7 +161,8 @@ class AdminController extends Controller
 
     public function users(UserDataTable $dataTable)
     {
-        return $dataTable->render('admin.users.index');
+    $users = User::paginate(10); // Adjust the number as needed
+    return view('admin.users.index', compact('users'));
     }
 
     public function getUsersData()
@@ -210,23 +201,18 @@ class AdminController extends Controller
             
             // Don't allow deleting yourself
             if (auth()->id() == $id) {
-                return response()->json([
-                    'success' => false,
-                    'message' => "You cannot delete your own account."
-                ], 403);
+                return redirect()->back()
+                       ->with('error', "You cannot delete your own account.");
             }
             
             $user->delete();
             
-            return response()->json([
-                'success' => true,
-                'message' => "User '{$name}' has been deleted successfully."
-            ]);
+            return redirect()->route('users.index')
+                   ->with('success', "User '{$name}' has been deleted successfully.");
+            
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => "Error deleting user: " . $e->getMessage()
-            ], 500);
+            return redirect()->back()
+                   ->with('success', "User '{$name}' has been deleted successfully.");
         }
     }
 
@@ -268,6 +254,8 @@ class AdminController extends Controller
         return Excel::download(new UsersExport, 'users_template.xlsx');
     }
 
+    // Add these methods to your AdminController
+
     public function importProducts(Request $request)
     {
         $request->validate([
@@ -275,46 +263,10 @@ class AdminController extends Controller
         ]);
     
         try {
-            // Check if we have brands and price ranges
-            $brandCount = Brand::count();
-            $priceRangeCount = PriceRange::count();
-            
-            if ($brandCount == 0 || $priceRangeCount == 0) {
-                return redirect()->route('admin.products')
-                    ->with('error', 'You need to create brands and price ranges before importing products.');
-            }
-            
-            // Import with transaction to ensure all or nothing
-            \DB::beginTransaction();
-            
             Excel::import(new ProductsImport, $request->file('file'));
-            
-            \DB::commit();
             return redirect()->route('admin.products')->with('success', 'Products imported successfully.');
-        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-            \DB::rollBack();
-            
-            $failures = $e->failures();
-            $errors = [];
-            
-            foreach ($failures as $failure) {
-                $errors[] = "Row {$failure->row()}: {$failure->errors()[0]}";
-            }
-            
-            Log::error('Product import validation failed', ['errors' => $errors]);
-            return redirect()->route('admin.products')
-                ->with('error', 'Validation errors: ' . implode(', ', array_slice($errors, 0, 5)) . 
-                    (count($errors) > 5 ? ' and ' . (count($errors) - 5) . ' more errors.' : ''));
         } catch (\Exception $e) {
-            \DB::rollBack();
-            
-            Log::error('Product import failed', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return redirect()->route('admin.products')
-                ->with('error', 'Error importing products: ' . $e->getMessage());
+            return redirect()->route('admin.products')->with('error', 'Error importing products: ' . $e->getMessage());
         }
     }
 
@@ -360,7 +312,7 @@ class AdminController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'current_password' => 'nullable|required_with:password|password',
+            'current_password' => 'required_with:password|current_password',
             'password' => 'nullable|min:8|confirmed',
         ]);
         
@@ -420,6 +372,7 @@ class AdminController extends Controller
     {
         $brands = Brand::all();
         $priceRanges = PriceRange::all();
-        return view('admin.products.create', compact('brands', 'priceRanges'));
+        // Change the view name here
+        return view('admin.products', compact('brands', 'priceRanges'));
     }
 }

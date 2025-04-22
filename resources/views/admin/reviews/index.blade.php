@@ -12,41 +12,76 @@
     @endif
     
     <div class="card-header">
-        <h1>Product Reviews</h1>
+        <div class="d-flex justify-content-between align-items-center">
+            <h1>Product Reviews</h1>
+            <div class="d-flex">
+                <form method="GET" action="{{ route('admin.reviews.index') }}" class="me-2">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Search..." 
+                               value="{{ request('search') }}">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
     
     <div class="card-body">
-        {!! $dataTable->table(['class' => 'table table-bordered table-striped']) !!}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Review ID</th>
+                        <th>Product</th>
+                        <th>User</th>
+                        <th>Rating</th>
+                        <th>Comment</th>
+                        <th>Created At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($reviews as $review)
+                    <tr>
+                        <td>{{ $review->review_id }}</td>
+                        <td>{{ $review->product->name ?? 'N/A' }}</td>
+                        <td>{{ $review->user->name ?? 'N/A' }}</td>
+                        <td>
+                            @for($i = 1; $i <= 5; $i++)
+                                @if($i <= $review->rating)
+                                    <i class="fas fa-star text-warning"></i>
+                                @else
+                                    <i class="far fa-star text-warning"></i>
+                                @endif
+                            @endfor
+                            ({{ $review->rating }})
+                        </td>
+                        <td>{{ Str::limit($review->comment, 50) }}</td>
+                        <td>{{ $review->created_at->format('Y-m-d H:i') }}</td>
+                        <td>
+                            <form action="{{ route('admin.reviews.destroy', $review->review_id) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this review?')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="7" class="text-center">No reviews found</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+            
+            <div class="d-flex justify-content-center">
+                {{ $reviews->appends(request()->query())->links() }}
+            </div>
+        </div>
     </div>
 </div>
 @endsection
-
-@push('scripts')
-<script>
-$(document).ready(function() {
-    // Delete button handler
-    $(document).on('click', '.delete-review', function() {
-        var id = $(this).data('id');
-        var url = $(this).data('url');
-        
-        if (confirm('Are you sure you want to delete this review?')) {
-            $.ajax({
-                url: url,
-                type: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    window.LaravelDataTables['reviews-table'].ajax.reload();
-                    alert(response.message || 'Review deleted successfully');
-                },
-                error: function(xhr) {
-                    alert('Error: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Could not delete review'));
-                }
-            });
-        }
-    });
-});
-</script>
-{!! $dataTable->scripts() !!}
-@endpush

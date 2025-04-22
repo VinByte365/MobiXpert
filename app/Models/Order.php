@@ -25,8 +25,6 @@ class Order extends Model
         'id',
         'total_amount',
         'status',
-        'shipping_address',
-        'billing_address',
     ];
 
     /**

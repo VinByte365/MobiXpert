@@ -154,7 +154,7 @@
                 </a>
             </li>
             <li>
-                <a href="{{ route('admin.reviews') }}" class="{{ request()->routeIs('admin.reviews*') ? 'active' : '' }}">
+                <a href="{{ route('admin.reviews.index') }}" class="{{ request()->routeIs('admin.reviews*') ? 'active' : '' }}">
                     <i class="fas fa-star"></i> Reviews
                 </a>
             </li>
@@ -163,11 +163,7 @@
                     <i class="fas fa-user-cog"></i> Profile
                 </a>
             </li>
-            <li>
-                <a href="{{ route('admin.settings') }}" class="{{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
-                    <i class="fas fa-cog"></i> Settings
-                </a>
-            </li>
+            
             <li>
                 <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     <i class="fas fa-sign-out-alt"></i> Logout

@@ -16,8 +16,6 @@ return new class extends Migration
             $table->unsignedBigInteger('id')->index('orders_id_foreign');
             $table->decimal('total_amount', 10);
             $table->enum('status', ['pending', 'cancelled', 'completed'])->default('pending');
-            $table->string('shipping_address')->nullable();
-            $table->string('billing_address')->nullable();
             $table->timestamps();
         });
     }

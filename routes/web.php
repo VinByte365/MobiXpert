@@ -9,12 +9,12 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
-
+use App\Http\Controllers\ReviewController;
 
 Auth::routes(['verify' => true]);
 
 // User routes
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'role:user'])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/shop', [HomeController::class, 'shop'])->name('shop');
     Route::get('/product/{id}', [HomeController::class, 'productDetail'])->name('product.detail');
@@ -42,16 +42,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/', [OrderController::class, 'store'])->name('orders.store');
         Route::get('/{order_id}', [OrderController::class, 'show'])->name('orders.show');
     });
+
+    // Review routes
+    Route::get('/reviews/create/{orderId}/{productId}', [ReviewController::class, 'create'])->name('reviews.create');
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::get('/reviews/{review}/edit', [ReviewController::class, 'edit'])->name('reviews.edit');
+    Route::put('/reviews/{review}', [ReviewController::class, 'update'])->name('reviews.update');
+    Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+    // Profile routes
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.update-photo');
 });
 
 // Admin routes
-Route::prefix('admin')->middleware(['auth', 'verified'])->name('admin.')->group(function () {
-    Route::get('/', [AdminController::class, 'index'])->name('index');
+Route::prefix('admin')->middleware(['auth', 'verified', 'role:admin'])->name('admin.')->group(function () {
+        Route::get('/', [AdminController::class, 'index'])->name('index');
     
     // Product routes
     Route::prefix('products')->group(function () {
         Route::get('/', [AdminController::class, 'products'])->name('products');
-        Route::get('/create', [AdminController::class, 'create'])->name('products.create'); // Add this line
+        Route::get('/create', [AdminController::class, 'create'])->name('products.create');
         Route::get('/data', [AdminController::class, 'getProductsData'])->name('products.data');
         Route::post('/', [AdminController::class, 'store'])->name('products.store');
         Route::get('/{product}/edit', [AdminController::class, 'edit'])->name('products.edit');
@@ -81,8 +93,8 @@ Route::prefix('admin')->middleware(['auth', 'verified'])->name('admin.')->group(
     });
     
     // Reviews routes
-    Route::get('/reviews', [AdminController::class, 'reviews'])->name('reviews');
-    Route::delete('/reviews/{review}', [AdminController::class, 'destroyReview'])->name('reviews.destroy');
+    Route::get('reviews', [\App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('reviews.index');
+    Route::delete('reviews/{review}', [\App\Http\Controllers\Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
     
     // Profile and Settings routes
     Route::get('/profile', [AdminController::class, 'profile'])->name('profile');
